@@ -36,7 +36,7 @@ unsigned int TelemetryDataHandler::format_string(char* buffer, size_t buffer_siz
     } else {
         strcat(buffer, "N/A");
     }
-    sprintf(buffer + strlen(buffer), ",%u", data.ag_rate_2);
+    sprintf(buffer + strlen(buffer), ",,%u", data.ag_rate_2);
     return strlen(buffer);
 }
 
