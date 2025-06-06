@@ -3,18 +3,18 @@
 TelemetryDataHandler::TelemetryDataHandler() {}
 
 // TODO: Implementar
-void TelemetryDataHandler::write_bytes(uint8_t* destination) {
+/* void TelemetryDataHandler::write_bytes(uint8_t* destination) {
     TelemetryData_t data_to_save = data;
     // Convert the large structure to the compact one
     // to_compact();
-}
+} */
 
 // TODO: Implementar
-void TelemetryDataHandler::read_bytes(uint8_t* buffer_src) {
+/* void TelemetryDataHandler::read_bytes(uint8_t* buffer_src) {
     // este buffer viene en el formato compacto, la idea es pasarlo a la estructura grande.
-}
+} */
 
-unsigned int TelemetryDataHandler::format_string(char* buffer, size_t size) {
+unsigned int TelemetryDataHandler::format_string(char* buffer, size_t buffer_size) {
     memset(buffer, 0, buffer_size); // Clear the buffer
 
     char mode_value = data.mode ? 'S' : 'F';

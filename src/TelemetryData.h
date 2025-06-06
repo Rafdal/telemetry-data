@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <cstring>
+#include <Arduino.h>
 
 #define DECIMAL_POINTS 1
 #define MAX_COMMAND_ECHO_LENGTH 16
@@ -39,7 +40,7 @@ public:
 };
 
 typedef struct TelemetryDataCompact {
-    Time_Data_t mission_time_rtc;
+    Time_Data mission_time_rtc;
     uint16_t packet_count;
     uint8_t mode;
     uint8_t state;
@@ -52,7 +53,7 @@ typedef struct TelemetryDataCompact {
     Axis_Data_Compact_t mag;
     uint16_t ag1_rot_rate;
     uint16_t ag2_rot_rate;  // ESTE AL FINAL
-    Time_Data_t gps_time;
+    Time_Data gps_time;
     uint16_t gps_altitude;
     float gps_latitude;
     float gps_longitude;
