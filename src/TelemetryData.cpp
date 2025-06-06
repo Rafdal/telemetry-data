@@ -2,34 +2,46 @@
 
 TelemetryDataHandler::TelemetryDataHandler() {}
 
+// TODO: Implementar
 void TelemetryDataHandler::write_bytes(uint8_t* destination) {
     TelemetryData_t data_to_save = data;
     // Convert the large structure to the compact one
-    to_compact();
+    // to_compact();
 }
 
+// TODO: Implementar
 void TelemetryDataHandler::read_bytes(uint8_t* buffer_src) {
     // este buffer viene en el formato compacto, la idea es pasarlo a la estructura grande.
 }
 
-// Temporalmente comentado para evitar errores de compilacion.
 unsigned int TelemetryDataHandler::format_string(char* buffer, size_t size) {
-    // memset(buffer, 0, sizeof(buffer)); // Clear the buffer
-    
-    // strcat(buffer, "3165,HH:MM:SS,");
-    // char mode = (simulation_enabled) ? 'S' : 'F'; // Set mode based on simulation status
-    // sprintf(buffer+strlen(buffer), "%d,%c,%s,%0.1f,", packet_count++, mode, fsc.state_name(), alt);
-    // sprintf(buffer+strlen(buffer), "%0.1f,%0.1f,%0.1f,", t, p_kpa*1000.0f, vbat);
-    // sprintf(buffer+strlen(buffer), "%0.1f,%0.1f,%0.1f,", 18.0f, 21.0f, 20.0f); // Gyro
-    // sprintf(buffer+strlen(buffer), "%0.1f,%0.1f,%0.1f,", accel_mean.x, accel_mean.y, accel_mean.z); // Accel
-    // sprintf(buffer+strlen(buffer), "%0.1f,%0.1f,%0.1f,", 0.22f, 0.03f, 0.09f); // Mag
-    // sprintf(buffer+strlen(buffer), "%0.1f,00:00:00,", 0.0f); // RPM, GPS Time
-    // strcat(buffer, "0.0,0.0,0.0,0,");
-    // sprintf(buffer+strlen(buffer), "%s,", compact_data.cmd_echo);
+    memset(buffer, 0, buffer_size); // Clear the buffer
+
+    char mode_value = data.mode ? 'S' : 'F';
+
+    strcat(buffer, "3165,");
+    data.rtc.to_string(buffer + strlen(buffer));
+    sprintf(buffer + strlen(buffer), ",%u,%c,%s", data.packet_count, mode_value, data.state_name_ptr);
+    sprintf(buffer + strlen(buffer), ",%0.1f,%0.1f,%0.1f,%0.1f,", data.altitude, data.temperature, data.pressure, data.voltage);
+    data.gyro.to_string(buffer + strlen(buffer));
+    strcat(buffer, ",");
+    data.accel.to_string(buffer + strlen(buffer));
+    strcat(buffer, ",");
+    data.mag.to_string(buffer + strlen(buffer));
+    sprintf(buffer + strlen(buffer), ",%u,", data.ag_rate);
+    data.gps_time.to_string(buffer + strlen(buffer));
+    sprintf(buffer + strlen(buffer), ",%0.1f,%0.4f,%0.4f,%u,", data.gps_alt, data.gps_lat, data.gps_long, data.gps_sats);
+    if (data.cmd_echo_ptr) {
+        strncat(buffer, data.cmd_echo_ptr, MAX_COMMAND_ECHO_LENGTH);
+    } else {
+        strcat(buffer, "N/A");
+    }
+    sprintf(buffer + strlen(buffer), ",%u", data.ag_rate_2);
+    return strlen(buffer);
 }
 
 
-void TelemetryDataHandler::to_compact() {
+/* void TelemetryDataHandler::to_compact() {
     // mission_time_rtc: same type and layout
     std::memcpy(&compact_data.mission_time_rtc, &data.mission_time_rtc, sizeof(Time_Data_t));
 
@@ -127,4 +139,4 @@ void TelemetryDataHandler::to_user_friendly() {
     // cmd_echo: char array, safe copy
     std::memset(recovered_data.cmd_echo, 0, MAX_COMMAND_ECHO_LENGTH);
     std::strncpy(recovered_data.cmd_echo, compact_recovered_data.cmd_echo, MAX_COMMAND_ECHO_LENGTH - 1);
-}
+} */

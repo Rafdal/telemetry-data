@@ -7,11 +7,6 @@
 #define DECIMAL_POINTS 1
 #define MAX_COMMAND_ECHO_LENGTH 16
 
-typedef struct {
-    uint8_t hh;
-    uint8_t mm;
-    uint8_t ss;
-} Time_Data_t;
 
 typedef struct { 
     int16_t x_pitch;
@@ -19,11 +14,29 @@ typedef struct {
     int16_t z_yaw;
 } Axis_Data_Compact_t;
 
-typedef struct { 
+class Time_Data
+{
+public:
+    uint8_t hh;
+    uint8_t mm;
+    uint8_t ss;
+    void to_string(char* buffer) { sprintf(buffer, "%02d:%02d:%02d", hh, mm, ss); }
+    Time_Data() : hh(0), mm(0), ss(0) {} // Default constructor
+    Time_Data(uint8_t hour, uint8_t minute, uint8_t second)
+        : hh(hour), mm(minute), ss(second) {} // Parameterized constructor
+};
+
+class Axis_Data
+{ 
+public:
     float x_pitch;
     float y_roll;
     float z_yaw;
-} Axis_Data_t;
+    void to_string(char* buffer) { sprintf(buffer, "%0.2f,%0.2f,%0.2f", x_pitch, y_roll, z_yaw); }
+    Axis_Data() : x_pitch(0), y_roll(0), z_yaw(0) {} // Default constructor
+    Axis_Data(float pitch, float roll, float yaw)
+        : x_pitch(pitch), y_roll(roll), z_yaw(yaw) {} // Parameterized constructor
+};
 
 typedef struct TelemetryDataCompact {
     Time_Data_t mission_time_rtc;
@@ -48,25 +61,25 @@ typedef struct TelemetryDataCompact {
 } TelemetryDataCompact_t;
 
 typedef struct TelemetryData {
-    Time_Data_t mission_time_rtc;
+    Time_Data rtc;
     uint16_t packet_count;
-    uint8_t mode;
-    uint8_t state;
+    bool mode;
+    char* state_name_ptr; // Pointer to state name string
     float altitude;
     float temperature;
     float pressure;
     float voltage;
-    Axis_Data_t gyro;
-    Axis_Data_t accel;
-    Axis_Data_t mag;
-    uint16_t ag1_rot_rate;
-    uint16_t ag2_rot_rate;  // ESTE AL FINAL
-    Time_Data_t gps_time;
-    float gps_altitude;
-    float gps_latitude;
-    float gps_longitude;
+    Axis_Data gyro;
+    Axis_Data accel;
+    Axis_Data mag;
+    uint16_t ag_rate;
+    uint16_t ag_rate_2;  // ESTE AL FINAL
+    Time_Data gps_time;
+    float gps_alt;
+    float gps_lat;
+    float gps_long;
     uint8_t gps_sats;
-    char cmd_echo[MAX_COMMAND_ECHO_LENGTH]; // Buffer for command echo
+    char* cmd_echo_ptr; // Buffer for command echo
 } TelemetryData_t;
 
 #define TELEMETRY_DATA_COMPACT_SIZE sizeof(TelemetryDataCompact_t)
@@ -80,12 +93,12 @@ public:
      * @brief Write the telemetry data to a RAW byte array.
      * @param destination Pointer to the byte array where the data will be written.
      */
-    void write_bytes(uint8_t* destination);
+    // void write_bytes(uint8_t* destination);
 
     /**
      * @brief Read the telemetry data from a byte array.
      */
-    void read_bytes(uint8_t* buffer_src);
+    // void read_bytes(uint8_t* buffer_src);
 
     /**
      * @brief Format the telemetry data as a CSV string.
@@ -98,17 +111,17 @@ public:
     /**
      * @brief Converts the data member (TelemetryData_t) to compact_data (TelemetryDataCompact_t)
      */
-    void to_compact();
+    // void to_compact();
 
     /**
      * @brief Converts the compact_data member (TelemetryDataCompact_t) to user-friendly data (TelemetryData_t).
      */
-    void to_user_friendly();
+    // void to_user_friendly();
 
     TelemetryData_t data; // user friendly data structure
     TelemetryDataCompact_t compact_data; // compact data structure for storage and transmission
     TelemetryDataCompact_t compact_recovered_data; // compact data structure recovered for flash storage
-    TelemetryData recovered_data; // data structure to recover saved data in flash
+    TelemetryData_t recovered_data; // data structure to recover saved data in flash
 
     /**
      * @brief Get the size of the compact telemetry data structure to write in memory.
