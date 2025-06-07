@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 #include <cstring>
-#include <Arduino.h>
+#include <stdio.h>
+// #include <Arduino.h>
 
 #define DECIMAL_POINTS 1
 #define MAX_COMMAND_ECHO_LENGTH 16
@@ -43,29 +44,31 @@ typedef struct TelemetryDataCompact {
     Time_Data mission_time_rtc;
     uint16_t packet_count;
     uint8_t mode;
-    uint8_t state;
-    uint16_t altitude;
-    uint16_t temperature;
-    uint16_t pressure;
-    uint8_t voltage;
-    Axis_Data_Compact_t gyro;
+    uint8_t state;  
+    uint16_t altitude;          // -300.0 a 6253.5 m    // NECESITA CONVERSION CON OFFSET
+    uint16_t temperature;       // 0.0 a 6553.5 °C 
+    uint16_t pressure;          // 0.0 a 6553.5 hPa
+    uint8_t voltage;            // 0.0 a 25.5 V
+    Axis_Data_Compact_t gyro;   // -3270.0 a 3270.0 °/s
     Axis_Data_Compact_t accel;
-    Axis_Data_Compact_t mag;
-    uint16_t ag1_rot_rate;
+    Axis_Data_Compact_t mag;    // -327.67 a 327.67 gauss
+    uint16_t ag1_rot_rate;      // igual
     uint16_t ag2_rot_rate;  // ESTE AL FINAL
     Time_Data gps_time;
-    uint16_t gps_altitude;
+    uint16_t gps_altitude;  // -300.0 a 6253.5 m
     float gps_latitude;
     float gps_longitude;
     uint8_t gps_sats;
     char cmd_echo[MAX_COMMAND_ECHO_LENGTH]; // Buffer for command echo
 } TelemetryDataCompact_t;
+#define TELEMETRY_DATA_COMPACT_SIZE sizeof(TelemetryDataCompact_t)
 
 typedef struct TelemetryData {
     Time_Data rtc;
     uint16_t packet_count;
     bool mode;
     char* state_name_ptr; // Pointer to state name string
+    uint8_t state_id; // FSM state ID
     float altitude;
     float temperature;
     float pressure;
@@ -82,9 +85,8 @@ typedef struct TelemetryData {
     uint8_t gps_sats;
     char* cmd_echo_ptr; // Buffer for command echo
 } TelemetryData_t;
-
-#define TELEMETRY_DATA_COMPACT_SIZE sizeof(TelemetryDataCompact_t)
 #define TELEMETRY_DATA_SIZE sizeof(TelemetryData_t)
+
 
 class TelemetryDataHandler {
 public:
@@ -94,12 +96,12 @@ public:
      * @brief Write the telemetry data to a RAW byte array.
      * @param destination Pointer to the byte array where the data will be written.
      */
-    // void write_bytes(uint8_t* destination);
+    void write_bytes(uint8_t* destination);
 
     /**
      * @brief Read the telemetry data from a byte array.
      */
-    // void read_bytes(uint8_t* buffer_src);
+    void read_bytes(uint8_t* buffer_src);
 
     /**
      * @brief Format the telemetry data as a CSV string.
@@ -112,17 +114,15 @@ public:
     /**
      * @brief Converts the data member (TelemetryData_t) to compact_data (TelemetryDataCompact_t)
      */
-    // void to_compact();
+    void to_compact();
 
     /**
      * @brief Converts the compact_data member (TelemetryDataCompact_t) to user-friendly data (TelemetryData_t).
      */
-    // void to_user_friendly();
+    void to_user_friendly();
 
     TelemetryData_t data; // user friendly data structure
-    TelemetryDataCompact_t compact_data; // compact data structure for storage and transmission
-    TelemetryDataCompact_t compact_recovered_data; // compact data structure recovered for flash storage
-    TelemetryData_t recovered_data; // data structure to recover saved data in flash
+    TelemetryDataCompact_t compact_data; // compact data structure
 
     /**
      * @brief Get the size of the compact telemetry data structure to write in memory.
